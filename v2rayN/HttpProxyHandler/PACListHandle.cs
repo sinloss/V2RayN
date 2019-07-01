@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using v2rayN.Mode;
 using v2rayN.Properties;
@@ -32,6 +33,8 @@ namespace v2rayN.HttpProxyHandler
 
         private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
 
+        private static Regex RoutePattern = new Regex(@"([a-z]*:?)([a-zA-Z0-9\.-]+).*");
+
         public void UpdatePACFromGFWList(Config config)
         {
             string url = GFWLIST_URL;
@@ -49,16 +52,18 @@ namespace v2rayN.HttpProxyHandler
             WebClient http = new WebClient();
             //http.Headers.Add("Connection", "Close");
             //http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), httpProxy.localPort);
-            http.DownloadStringCompleted += http_DownloadStringCompleted;
+            http.DownloadStringCompleted += delegate(object sender, DownloadStringCompletedEventArgs e) {
+                http_DownloadStringCompleted(sender, e, config);
+            };
             http.DownloadStringAsync(new Uri(url));
         }
 
-        private void http_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
+        private void http_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e, Config config = null)
         {
             try
             {
                 File.WriteAllText(Utils.GetTempPath("gfwlist.txt"), e.Result, Encoding.UTF8);
-                List<string> lines = ParseResult(e.Result);
+                List<string> lines = this.merge(ParseResult(e.Result), config);
                 string abpContent = Utils.UnGzip(Resources.abp_js);
                 abpContent = abpContent.Replace("__RULES__", JsonConvert.SerializeObject(lines, Formatting.Indented));
                 File.WriteAllText(Utils.GetPath(Global.pacFILE), abpContent, Encoding.UTF8);
@@ -70,6 +75,45 @@ namespace v2rayN.HttpProxyHandler
 
                 if (Error != null) Error(this, new ErrorEventArgs(ex));
             }
+        }
+
+        /// <summary>
+        /// 从config中提取必要信息，并合并到pac的规则中
+        /// </summary>
+        /// <param name="lines">pac规则列表</param>
+        /// <param name="config">配置信息</param>
+        /// <returns>合并后的新列表</returns>
+        private List<string> merge(List<string> lines, Config config) {
+            if (lines != null && config != null) {
+                foreach (string u in config.useragent) {
+                    string ua = u.Trim();
+                    if (ua.StartsWith("geoip:") || ua.StartsWith("geosite:")
+                        || ua.StartsWith("ext:")) continue;
+                    Match m = RoutePattern.Match(ua);
+                    if (m.Success)
+                    {
+                        GroupCollection g = m.Groups;
+                        string mode = g[1].Value;
+                        string host = g[2].Value;
+                        switch (mode) {
+                            case "domain:":
+                                lines.Add("*." + host); // matches sub domain
+                                lines.Add(host); // matches exactly itself
+                                break;
+                            case "regex:":
+                                lines.Add(@"\" + host + @"\");
+                                break;
+                            case "full:":
+                                lines.Add(host);
+                                break;
+                            default:
+                                lines.Add("*" + host + "*");
+                                break;
+                        }
+                    }
+                }
+            }
+            return lines;
         }
 
         public static List<string> ParseResult(string response)
