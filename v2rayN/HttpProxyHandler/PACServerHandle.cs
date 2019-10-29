@@ -20,6 +20,8 @@ namespace v2rayN.HttpProxyHandler
 
         public static void Init(Config config)
         {
+            // Reset pacList to fix gh-1
+            pacList = new Hashtable();
             InitServer("127.0.0.1");
 
             if (config.allowLANConn)
@@ -84,23 +86,20 @@ namespace v2rayN.HttpProxyHandler
 
         public static void Stop()
         {
-            try
+            if (httpWebServer == null)
             {
-                if (httpWebServer == null)
-                {
-                    return;
-                }
-                foreach (var key in httpWebServer.Keys)
-                {
+                return;
+            }
+            foreach (var key in httpWebServer.Keys)
+            {
+                try {
                     Utils.SaveLog("Webserver Stop " + key.ToString());
                     ((HttpWebServer)httpWebServer[key]).Stop();
+                } catch (Exception ex){
+                    Utils.SaveLog("Webserver Stop " + ex.Message);
                 }
-                httpWebServer.Clear();
             }
-            catch (Exception ex)
-            {
-                Utils.SaveLog("Webserver Stop " + ex.Message);
-            }
+            httpWebServer.Clear();
         }
 
         private static string GetPacList(string address)
