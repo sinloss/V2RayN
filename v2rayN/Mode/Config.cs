@@ -161,6 +161,13 @@ namespace v2rayN.Mode
             }
             return vmess[index].remarks;
         }
+
+        public bool ota() {
+            if (index < 0) {
+                return false;
+            }
+            return vmess[index].ota;
+        }
         public string network()
         {
             if (index < 0 || Utils.IsNullOrEmpty(vmess[index].network))
@@ -267,6 +274,7 @@ namespace v2rayN.Mode
             configType = (int)EConfigType.Vmess;
             testResult = string.Empty;
             subid = string.Empty;
+            ota = false;
         }
 
         public string getSummary()
@@ -399,6 +407,8 @@ namespace v2rayN.Mode
         /// SubItem id
         /// </summary>
         public string subid { get; set; }
+
+        public bool ota { get; set; }
     }
 
     [Serializable]

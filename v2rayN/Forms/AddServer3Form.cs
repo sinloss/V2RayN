@@ -40,6 +40,7 @@ namespace v2rayN.Forms
             txtId.Text = vmessItem.id;
             cmbSecurity.Text = vmessItem.security;
             txtRemarks.Text = vmessItem.remarks;
+            cmbOta.Text = vmessItem.ota.ToString();
         }
 
 
@@ -62,6 +63,7 @@ namespace v2rayN.Forms
             string id = txtId.Text;
             string security = cmbSecurity.Text;
             string remarks = txtRemarks.Text;
+            string ota = cmbOta.Text;
 
             if (Utils.IsNullOrEmpty(address))
             {
@@ -89,6 +91,7 @@ namespace v2rayN.Forms
             vmessItem.id = id;
             vmessItem.security = security;
             vmessItem.remarks = remarks;
+            vmessItem.ota = Convert.ToBoolean(ota);
 
             if (ConfigHandler.AddShadowsocksServer(ref config, vmessItem, EditIndex) == 0)
             {
@@ -135,9 +138,28 @@ namespace v2rayN.Forms
             txtId.Text = vmessItem.id;
             txtRemarks.Text = vmessItem.remarks;
         }
-         
-        #endregion
-         
 
+
+        #endregion
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cmbSecurity_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtRemarks_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

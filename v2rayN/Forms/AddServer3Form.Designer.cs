@@ -32,8 +32,10 @@
             this.btnClose = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.label13 = new System.Windows.Forms.Label();
+            this.cmbOta = new System.Windows.Forms.ComboBox();
             this.cmbSecurity = new System.Windows.Forms.ComboBox();
             this.txtRemarks = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.txtId = new System.Windows.Forms.TextBox();
@@ -64,8 +66,10 @@
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.label13);
+            this.groupBox1.Controls.Add(this.cmbOta);
             this.groupBox1.Controls.Add(this.cmbSecurity);
             this.groupBox1.Controls.Add(this.txtRemarks);
+            this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.label6);
             this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.Controls.Add(this.txtId);
@@ -83,6 +87,17 @@
             resources.ApplyResources(this.label13, "label13");
             this.label13.Name = "label13";
             // 
+            // cmbOta
+            // 
+            this.cmbOta.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbOta.FormattingEnabled = true;
+            this.cmbOta.Items.AddRange(new object[] {
+            resources.GetString("cmbOta.Items"),
+            resources.GetString("cmbOta.Items1")});
+            resources.ApplyResources(this.cmbOta, "cmbOta");
+            this.cmbOta.Name = "cmbOta";
+            this.cmbOta.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
             // cmbSecurity
             // 
             this.cmbSecurity.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -98,11 +113,19 @@
             resources.GetString("cmbSecurity.Items7")});
             resources.ApplyResources(this.cmbSecurity, "cmbSecurity");
             this.cmbSecurity.Name = "cmbSecurity";
+            this.cmbSecurity.SelectedIndexChanged += new System.EventHandler(this.cmbSecurity_SelectedIndexChanged);
             // 
             // txtRemarks
             // 
             resources.ApplyResources(this.txtRemarks, "txtRemarks");
             this.txtRemarks.Name = "txtRemarks";
+            this.txtRemarks.TextChanged += new System.EventHandler(this.txtRemarks_TextChanged);
+            // 
+            // label4
+            // 
+            resources.ApplyResources(this.label4, "label4");
+            this.label4.Name = "label4";
+            this.label4.Click += new System.EventHandler(this.label4_Click);
             // 
             // label6
             // 
@@ -227,5 +250,7 @@
         private System.Windows.Forms.MenuStrip menuServer;
         private System.Windows.Forms.ToolStripMenuItem MenuItem1;
         private System.Windows.Forms.ToolStripMenuItem menuItemImportClipboard;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox cmbOta;
     }
 }

@@ -376,7 +376,7 @@ namespace v2rayN.Handler
                     serversItem.password = config.id();
                     serversItem.method = config.security();
 
-                    serversItem.ota = false;
+                    serversItem.ota = config.ota();
                     serversItem.level = 1;
 
                     outbound.mux.enabled = false;
