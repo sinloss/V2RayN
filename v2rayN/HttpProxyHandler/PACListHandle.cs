@@ -63,7 +63,7 @@ namespace v2rayN.HttpProxyHandler
             try
             {
                 File.WriteAllText(Utils.GetTempPath("gfwlist.txt"), e.Result, Encoding.UTF8);
-                List<string> lines = this.merge(ParseResult(e.Result), config);
+                List<string> lines = ParseResult(e.Result, config);
                 string abpContent = Utils.UnGzip(Resources.abp_js);
                 abpContent = abpContent.Replace("__RULES__", JsonConvert.SerializeObject(lines, Formatting.Indented));
                 File.WriteAllText(Utils.GetPath(Global.pacFILE), abpContent, Encoding.UTF8);
@@ -82,8 +82,9 @@ namespace v2rayN.HttpProxyHandler
         /// </summary>
         /// <param name="lines">pac规则列表</param>
         /// <param name="config">配置信息</param>
-        /// <returns>合并后的新列表</returns>
-        private List<string> merge(List<string> lines, Config config) {
+        /// <returns>需要从PAC中剔除的规则</returns>
+        private static List<Regex> merge(List<string> lines, Config config) {
+            List<Regex> cull = new List<Regex>();
             if (lines != null && config != null) {
                 foreach (string u in config.useragent) {
                     string ua = u.Trim();
@@ -97,40 +98,54 @@ namespace v2rayN.HttpProxyHandler
                         string host = g[2].Value;
                         switch (mode) {
                             case "domain:":
-                                lines.Add("*." + host); // matches sub domain
+                                cull.Add(new Regex(@"@@.+" + @host));
                                 lines.Add(host); // matches exactly itself
+                                lines.Add("*." + host); // matches sub domain
                                 break;
                             case "regex:":
+                                cull.Add(new Regex(@"@@.*" + host));
                                 lines.Add(@"\" + host + @"\");
                                 break;
                             case "full:":
+                                cull.Add(new Regex(@"@@||" + @host));
                                 lines.Add(host);
                                 break;
                             default:
+                                cull.Add(new Regex(@"@@.*" + @host + ".*"));
                                 lines.Add("*" + host + "*");
                                 break;
                         }
                     }
                 }
             }
-            return lines;
+            return cull;
         }
 
-        public static List<string> ParseResult(string response)
+        public static List<string> ParseResult(string response, Config config)
         {
             byte[] bytes = Convert.FromBase64String(response);
             string content = Encoding.ASCII.GetString(bytes);
             List<string> valid_lines = new List<string>();
+            List<Regex> cull = merge(valid_lines, config);
             using (var sr = new StringReader(content))
             {
                 foreach (var line in sr.NonWhiteSpaceLines())
                 {
-                    if (line.BeginWithAny(IgnoredLineBegins))
+                    if (line.BeginWithAny(IgnoredLineBegins) || !should(cull, line))
                         continue;
                     valid_lines.Add(line);
                 }
             }
             return valid_lines;
+        }
+
+        public static bool should(List<Regex> cull, String line) {
+            foreach(Regex reg in cull) {
+                if(reg.IsMatch(line)) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }
