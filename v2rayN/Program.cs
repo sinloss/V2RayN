@@ -7,11 +7,9 @@ using v2rayN.Forms;
 namespace v2rayN
 {
     class Opt {
-        public readonly int? current;
         public readonly Mode.Config config;
 
-        public Opt(int? current, Mode.Config config) {
-            this.current = current;
+        public Opt(Mode.Config config) {
             this.config = config;
         }
     }
@@ -60,7 +58,6 @@ namespace v2rayN
                 HttpProxyHandler.ActionClient.Start();
                 HttpProxyHandler.ActionClient.Svr.Switch(opt.config);
                 HttpProxyHandler.ActionClient.Ctx.Close();
-                //Console.WriteLine(opt.current);
                 System.Environment.Exit(System.Environment.ExitCode);
             } else {
                 UI.Show("An instance of `v2rayN` exists");
@@ -75,10 +72,9 @@ namespace v2rayN
                 {
                     case "--switch":
                         Mode.Config config = Handler.ConfigHandler.lazyLoadedConfig();
-                        int current = config.listenerType;
                         try
                         {
-                            config.listenerType = args.Length >= 2 ? int.Parse(args[1]) : current;
+                            config.listenerType = args.Length >= 2 ? int.Parse(args[1]) : -1;
                         }
                         catch (FormatException)
                         {
@@ -86,7 +82,7 @@ namespace v2rayN
                             ColorWrite(args[1], ConsoleColor.Red, true);
                             System.Environment.Exit(1);
                         }
-                        return new Opt(current, config);
+                        return new Opt(config);
                     default:
                         Console.Write("Unkown option ");
                         ColorWrite(args[0], ConsoleColor.Red, true);

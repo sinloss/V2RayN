@@ -31,18 +31,23 @@ namespace v2rayN.HttpProxyHandler
     class ActionServer : SysAction.IService
     {
         public static SysAction.ICallback Cb { get; set; }
+        public static Action<Mode.Config> OnSwitch { get; set; }
+        public static bool Started { get; set; }
         public void Connect() {
             Cb = OperationContext.Current.GetCallbackChannel<SysAction.ICallback>();
         }
 
         public void Switch(Mode.Config config) {
-            HttpProxyHandler.HttpProxyHandle.Update(config, false);
+            OnSwitch?.Invoke(config);
         }
 
-        public static void Start() {
+        public static void Start(Action<Mode.Config> OnSwitch) {
+            ActionServer.OnSwitch = OnSwitch;
+            if (Started) return;
             var host = new ServiceHost(typeof(ActionServer), new Uri("net.pipe://localhost"));
             host.AddServiceEndpoint(typeof(SysAction.IService), new NetNamedPipeBinding(), "ACTION");
             host.Open();
+            Started = true;
         }
     }
 

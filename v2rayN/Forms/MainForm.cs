@@ -17,6 +17,7 @@ namespace v2rayN.Forms
         private V2rayUpdateHandle v2rayUpdateHandle;
         private V2rayUpdateHandle v2rayUpdateHandle2;
         private List<int> lvSelecteds = new List<int>();
+        private int? previousListenerType;
 
         #region Window 事件
 
@@ -39,7 +40,20 @@ namespace v2rayN.Forms
             if (config == null) ConfigHandler.LoadConfig(ref config);
             v2rayHandler = new V2rayHandler();
             v2rayHandler.ProcessEvent += v2rayHandler_ProcessEvent;
-            HttpProxyHandler.ActionServer.Start();
+            HttpProxyHandler.ActionServer.Start((tobe) => {
+                if (tobe.listenerType == -1)
+                {
+                    if (previousListenerType != null)
+                    {
+                        config.listenerType = (int)previousListenerType;
+                    }
+                }
+                else {
+                    previousListenerType = config.listenerType;
+                    config.listenerType = tobe.listenerType;
+                }
+                ChangePACButtonStatus(config.listenerType);
+            });
         }
 
         private void MainForm_Shown(object sender, EventArgs e)
