@@ -10,6 +10,8 @@ namespace v2rayN.Forms
 {
     public partial class OptionSettingForm : BaseForm
     {
+        private PACListHandle pacListHandle;
+        private Boolean changed = false;
         public OptionSettingForm()
         {
             InitializeComponent();
@@ -17,6 +19,7 @@ namespace v2rayN.Forms
 
         private void OptionSettingForm_Load(object sender, EventArgs e)
         {
+
             InitBase();
 
             InitRouting();
@@ -133,12 +136,22 @@ namespace v2rayN.Forms
 
             if (ConfigHandler.SaveConfig(ref config) == 0)
             {
+                this.UpdatePAC();
+                this.changed = false;
                 this.DialogResult = DialogResult.OK;
             }
             else
             {
                 UI.Show(UIRes.I18N("OperationFailed"));
             }
+        }
+
+        private void UpdatePAC() {
+            if (pacListHandle == null)
+            {
+                pacListHandle = new PACListHandle();
+            }
+            pacListHandle.UpdatePACFromGFWList(config);
         }
 
         /// <summary>
@@ -299,6 +312,7 @@ namespace v2rayN.Forms
 
         private void btnClose_Click(object sender, EventArgs e)
         {
+            changed = false;
             this.DialogResult = DialogResult.Cancel;
         }
 
@@ -375,5 +389,14 @@ namespace v2rayN.Forms
 
         }
 
+        private void txtUseragent_TextChanged(object sender, EventArgs e)
+        {
+            changed = true;
+        }
+
+        private void txtUserblock_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

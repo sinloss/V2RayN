@@ -20,7 +20,7 @@ namespace v2rayN.Forms
 
         #region Window 事件
 
-        public MainForm()
+        public MainForm(Mode.Config predefined = null)
         {
             InitializeComponent();
             this.ShowInTaskbar = false;
@@ -31,14 +31,15 @@ namespace v2rayN.Forms
             {
                 Utils.ClearTempPath();
             };
+            config = predefined;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            ConfigHandler.LoadConfig(ref config);
+            if (config == null) ConfigHandler.LoadConfig(ref config);
             v2rayHandler = new V2rayHandler();
             v2rayHandler.ProcessEvent += v2rayHandler_ProcessEvent;
-
+            HttpProxyHandler.ActionServer.Start();
         }
 
         private void MainForm_Shown(object sender, EventArgs e)
@@ -1366,6 +1367,11 @@ namespace v2rayN.Forms
         #endregion
 
         private void tsbHelp_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tsbCheckUpdate_Click(object sender, EventArgs e)
         {
 
         }

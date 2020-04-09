@@ -307,6 +307,7 @@ namespace v2rayN.Forms
             // 
             resources.ApplyResources(this.txtUseragent, "txtUseragent");
             this.txtUseragent.Name = "txtUseragent";
+            this.txtUseragent.TextChanged += new System.EventHandler(this.txtUseragent_TextChanged);
             // 
             // tabPage4
             // 
@@ -331,6 +332,7 @@ namespace v2rayN.Forms
             // 
             resources.ApplyResources(this.txtUserblock, "txtUserblock");
             this.txtUserblock.Name = "txtUserblock";
+            this.txtUserblock.TextChanged += new System.EventHandler(this.txtUserblock_TextChanged);
             // 
             // panel3
             // 

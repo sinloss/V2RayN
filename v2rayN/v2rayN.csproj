@@ -91,6 +91,7 @@
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Net" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="zxing">
@@ -153,6 +154,7 @@
     <Compile Include="HttpProxyHandler\PACServerHandle.cs" />
     <Compile Include="HttpProxyHandler\SysProxyHandle.cs" />
     <Compile Include="HttpProxyHandler\HttpProxyHandle.cs" />
+    <Compile Include="HttpProxyHandler\SysAction.cs" />
     <Compile Include="HttpProxyHandler\WebClientEx.cs">
       <SubType>Component</SubType>
     </Compile>
