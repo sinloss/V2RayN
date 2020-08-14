@@ -98,20 +98,20 @@ namespace v2rayN.HttpProxyHandler
                         string host = g[2].Value;
                         switch (mode) {
                             case "domain:":
-                                cull.Add(new Regex(@"@@.+" + @host));
-                                lines.Add(host); // matches exactly itself
-                                lines.Add("*." + host); // matches sub domain
+                                cull.Add(new Regex(@".+" + @host));
+                                lines.Add(@"||" + host + @"^"); // matches exactly itself
+                                lines.Add("." + host + @"^"); // matches sub domain
                                 break;
                             case "regex:":
-                                cull.Add(new Regex(@"@@.*" + host));
+                                cull.Add(new Regex(@".*" + host));
                                 lines.Add(@"\" + host + @"\");
                                 break;
                             case "full:":
-                                cull.Add(new Regex(@"@@||" + @host));
-                                lines.Add(host);
+                                cull.Add(new Regex(@"[\|https:]*" + @host));
+                                lines.Add(@"||" + host);
                                 break;
                             default:
-                                cull.Add(new Regex(@"@@.*" + @host + ".*"));
+                                cull.Add(new Regex(@".*" + @host + ".*"));
                                 lines.Add("*" + host + "*");
                                 break;
                         }
