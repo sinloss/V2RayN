@@ -1175,6 +1175,7 @@ namespace v2rayN.Forms
                                 }
                             }
                             AppendText(false, UIRes.I18N("MsgUpdateV2rayCoreSuccessfullyMore"));
+                            File.Move(fileName, Utils.GetTempPath(Path.GetFileName(fileName)));
 
                             Global.reloadV2ray = true;
                             LoadV2ray();

@@ -38,8 +38,8 @@ namespace v2rayN.Handler
             }
         }
 
-        private string latestUrl = "https://github.com/v2ray/v2ray-core/releases/latest";
-        private const string coreURL = "https://github.com/v2ray/v2ray-core/releases/download/{0}/v2ray-windows-{1}.zip";
+        private string latestUrl = "https://github.com/v2fly/v2ray-core/releases/latest";
+        private const string coreURL = "https://github.com/v2fly/v2ray-core/releases/download/{0}/v2ray-windows-{1}.zip";
         private int progressPercentage = -1;
         private bool blFirst = true;
         private long totalBytesToReceive = 0;
