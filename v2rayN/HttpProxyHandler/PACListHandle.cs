@@ -52,7 +52,8 @@ namespace v2rayN.HttpProxyHandler
             WebClient http = new WebClient();
             //http.Headers.Add("Connection", "Close");
             //http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), httpProxy.localPort);
-            http.DownloadStringCompleted += delegate(object sender, DownloadStringCompletedEventArgs e) {
+            http.DownloadStringCompleted += delegate (object sender, DownloadStringCompletedEventArgs e)
+            {
                 http_DownloadStringCompleted(sender, e, config);
             };
             http.DownloadStringAsync(new Uri(url));
@@ -83,65 +84,92 @@ namespace v2rayN.HttpProxyHandler
         /// <param name="lines">pac规则列表</param>
         /// <param name="config">配置信息</param>
         /// <returns>需要从PAC中剔除的规则</returns>
-        private static List<Regex> merge(List<string> lines, Config config) {
+        private static List<Regex> merge(List<string> lines, Config config)
+        {
             List<Regex> cull = new List<Regex>();
-            if (lines != null && config != null) {
-                foreach (string u in config.useragent) {
-                    string ua = u.Trim();
-                    if (ua.StartsWith("geoip:") || ua.StartsWith("geosite:")
-                        || ua.StartsWith("ext:")) continue;
-                    Match m = RoutePattern.Match(ua);
-                    if (m.Success)
+            if (lines != null && config != null)
+            {
+                Cull(cull, config.userdirect, null);
+                Cull(cull, config.useragent, (mode, host) =>
+                {
+                    switch (mode)
                     {
-                        GroupCollection g = m.Groups;
-                        string mode = g[1].Value;
-                        string host = g[2].Value;
-                        switch (mode) {
-                            case "domain:":
-                                cull.Add(new Regex(@".+" + @host));
-                                lines.Add(@"||" + host + @"^"); // matches exactly itself
-                                lines.Add("." + host + @"^"); // matches sub domain
-                                break;
-                            case "regex:":
-                                cull.Add(new Regex(@".*" + host));
-                                lines.Add(@"\" + host + @"\");
-                                break;
-                            case "full:":
-                                cull.Add(new Regex(@"[\|https:]*" + @host));
-                                lines.Add(@"||" + host);
-                                break;
-                            default:
-                                cull.Add(new Regex(@".*" + @host + ".*"));
-                                lines.Add("*" + host + "*");
-                                break;
-                        }
+                        case "domain:":
+                            lines.Add(@"||" + host + @"^"); // matches exactly itself
+                            lines.Add("." + host + @"^"); // matches sub domain
+                            break;
+                        case "regex:":
+                            lines.Add(@"\" + host + @"\");
+                            break;
+                        case "full:":
+                            lines.Add(@"||" + host);
+                            break;
+                        default:
+                            lines.Add("*" + host + "*");
+                            break;
                     }
-                }
+                });
             }
             return cull;
+        }
+
+        private static void Cull(List<Regex> cull, List<string> entries, Action<string, string> and)
+        {
+            foreach (string u in entries)
+            {
+                string ua = u.Trim();
+                if (ua.StartsWith("geoip:") || ua.StartsWith("geosite:")
+                    || ua.StartsWith("ext:")) continue;
+                Match m = RoutePattern.Match(ua);
+                if (m.Success)
+                {
+                    GroupCollection g = m.Groups;
+                    string mode = g[1].Value;
+                    string host = g[2].Value;
+                    switch (mode)
+                    {
+                        case "domain:":
+                            cull.Add(new Regex(@".+" + @host));
+                            break;
+                        case "regex:":
+                            cull.Add(new Regex(@".*" + host));
+                            break;
+                        case "full:":
+                            cull.Add(new Regex(@"[\|https:]*" + @host));
+                            break;
+                        default:
+                            cull.Add(new Regex(@".*" + @host + ".*"));
+                            break;
+                    }
+                    and?.Invoke(mode, host);
+                }
+            }
         }
 
         public static List<string> ParseResult(string response, Config config)
         {
             byte[] bytes = Convert.FromBase64String(response);
             string content = Encoding.ASCII.GetString(bytes);
-            List<string> valid_lines = new List<string>();
-            List<Regex> cull = merge(valid_lines, config);
+            List<string> valid = new List<string>();
+            List<Regex> cull = merge(valid, config);
             using (var sr = new StringReader(content))
             {
                 foreach (var line in sr.NonWhiteSpaceLines())
                 {
                     if (line.BeginWithAny(IgnoredLineBegins) || !should(cull, line))
                         continue;
-                    valid_lines.Add(line);
+                    valid.Add(line);
                 }
             }
-            return valid_lines;
+            return valid;
         }
 
-        public static bool should(List<Regex> cull, String line) {
-            foreach(Regex reg in cull) {
-                if(reg.IsMatch(line)) {
+        public static bool should(List<Regex> cull, String line)
+        {
+            foreach (Regex reg in cull)
+            {
+                if (reg.IsMatch(line))
+                {
                     return false;
                 }
             }
